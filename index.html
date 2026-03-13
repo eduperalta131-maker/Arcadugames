@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RetroBox — Emulador de Jogos Retro | 20.000+ Jogos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0d0d12;
+      --bg-card: #15151d;
+      --accent-cyan: #00f5d4;
+      --accent-magenta: #f72585;
+      --accent-yellow: #fee440;
+      --accent-purple: #9b5de5;
+      --text-light: #e8e8ed;
+      --text-muted: #8b8b9a;
+      --pixel-border: #2a2a35;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Grid de fundo retro com brilho */
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(0,245,212,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,212,0.05) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Bolinhas flutuantes neon */
+    .bg-dots {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .dot {
+      position: absolute;
+      border-radius: 50%;
+      animation: dotFloat 5s ease-in-out infinite;
+    }
+
+    .dot-1 { width: 10px; height: 10px; left: 10%; top: 20%; background: rgba(0,245,212,0.45); box-shadow: 0 0 24px rgba(0,245,212,0.6); animation-delay: 0s; animation-duration: 4s; }
+    .dot-2 { width: 14px; height: 14px; left: 85%; top: 15%; background: rgba(247,37,133,0.4); box-shadow: 0 0 28px rgba(247,37,133,0.6); animation-delay: 0.5s; animation-duration: 5.5s; }
+    .dot-3 { width: 8px; height: 8px; left: 25%; top: 60%; background: rgba(155,93,229,0.45); box-shadow: 0 0 18px rgba(155,93,229,0.6); animation-delay: 1s; animation-duration: 4.5s; }
+    .dot-4 { width: 12px; height: 12px; left: 70%; top: 45%; background: rgba(254,228,64,0.35); box-shadow: 0 0 24px rgba(254,228,64,0.5); animation-delay: 1.5s; animation-duration: 6s; }
+    .dot-5 { width: 10px; height: 10px; left: 50%; top: 80%; background: rgba(0,245,212,0.4); box-shadow: 0 0 20px rgba(0,245,212,0.6); animation-delay: 2s; animation-duration: 3.5s; }
+    .dot-6 { width: 16px; height: 16px; left: 5%; top: 45%; background: rgba(247,37,133,0.3); box-shadow: 0 0 26px rgba(247,37,133,0.5); animation-delay: 2.5s; animation-duration: 5s; }
+    .dot-7 { width: 8px; height: 8px; left: 90%; top: 70%; background: rgba(155,93,229,0.4); box-shadow: 0 0 16px rgba(155,93,229,0.6); animation-delay: 3s; animation-duration: 4.2s; }
+    .dot-8 { width: 12px; height: 12px; left: 35%; top: 10%; background: rgba(254,228,64,0.3); box-shadow: 0 0 20px rgba(254,228,64,0.5); animation-delay: 0.8s; animation-duration: 5.2s; }
+    .dot-9 { width: 10px; height: 10px; left: 60%; top: 25%; background: rgba(0,245,212,0.35); box-shadow: 0 0 18px rgba(0,245,212,0.5); animation-delay: 1.2s; animation-duration: 4.8s; }
+    .dot-10 { width: 14px; height: 14px; left: 75%; top: 85%; background: rgba(247,37,133,0.35); box-shadow: 0 0 24px rgba(247,37,133,0.6); animation-delay: 2.2s; animation-duration: 3.8s; }
+
+    @keyframes dotFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(18px, -24px) scale(1.15); }
+      50% { transform: translate(-12px, 18px) scale(0.95); }
+      75% { transform: translate(24px, 12px) scale(1.08); }
+    }
+
+    /* Consoles descendo de cima para baixo */
+    .bg-cartoons {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .cartoon-item {
+      position: absolute;
+      left: 0;
+      opacity: 0.2;
+      filter: drop-shadow(0 0 12px currentColor);
+      animation: fallDown linear infinite;
+    }
+
+    .cartoon-item svg {
+      display: block;
+    }
+
+    .cartoon-item.neon-cyan { color: var(--accent-cyan); filter: drop-shadow(0 0 12px rgba(0,245,212,0.6)); }
+    .cartoon-item.neon-pink { color: var(--accent-magenta); filter: drop-shadow(0 0 12px rgba(247,37,133,0.6)); }
+    .cartoon-item.neon-purple { color: var(--accent-purple); filter: drop-shadow(0 0 12px rgba(155,93,229,0.6)); }
+    .cartoon-item.neon-yellow { color: var(--accent-yellow); filter: drop-shadow(0 0 12px rgba(254,228,64,0.5)); }
+
+    .fall-1 { animation-duration: 25s; left: 8%; animation-delay: 0s; }
+    .fall-2 { animation-duration: 30s; left: 25%; animation-delay: -5s; }
+    .fall-3 { animation-duration: 22s; left: 45%; animation-delay: -12s; }
+    .fall-4 { animation-duration: 28s; left: 65%; animation-delay: -8s; }
+    .fall-5 { animation-duration: 26s; left: 82%; animation-delay: -15s; }
+    .fall-6 { animation-duration: 32s; left: 15%; animation-delay: -20s; }
+    .fall-7 { animation-duration: 24s; left: 55%; animation-delay: -10s; }
+    .fall-8 { animation-duration: 27s; left: 90%; animation-delay: -18s; }
+
+    @keyframes fallDown {
+      0% { top: -15%; transform: translateX(0) rotate(0deg); }
+      100% { top: 115%; transform: translateX(0) rotate(5deg); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      padding: 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .logo {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 20px rgba(0,245,212,0.5);
+      letter-spacing: 2px;
+    }
+
+    .logo span {
+      color: var(--accent-magenta);
+    }
+
+    nav {
+      display: flex;
+      gap: 24px;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 85vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 80px 0 60px;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+
+    .hero-content {
+      flex: 1 1 400px;
+      max-width: 600px;
+    }
+
+    .hero-title-block {
+      margin-bottom: 24px;
+    }
+
+    .hero-contact {
+      flex-shrink: 0;
+      align-self: flex-start;
+      padding: 16px 20px;
+      background: rgba(0, 245, 212, 0.06);
+      border: 1px solid rgba(0, 245, 212, 0.2);
+      border-radius: 12px;
+    }
+
+    .hero-contact-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 12px !important;
+    }
+
+    .hero-contact-icons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .hero-contact .icon-square {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      font-size: 1.5rem;
+      background: transparent;
+      border: 2px solid rgba(0, 245, 212, 0.4);
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .hero-contact .icon-square:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(0, 245, 212, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-magenta));
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 24px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .hero h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      line-height: 1.6;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      max-width: 500px;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      gap: 48px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-number {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      color: var(--accent-cyan);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* CTA */
+    .cta-section {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 36px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), #00c4a7);
+      color: var(--bg-dark);
+      box-shadow: 0 4px 24px rgba(0,245,212,0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,245,212,0.5);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent-cyan);
+      border: 2px solid var(--accent-cyan);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0,245,212,0.1);
+    }
+
+    .price-tag {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.5rem;
+      color: var(--accent-yellow);
+      text-shadow: 0 0 20px rgba(254,228,64,0.3);
+    }
+
+    .price-tag span {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    /* Hero Visual */
+    .hero-visual {
+      flex: 1 1 380px;
+      min-width: 300px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .console-mockup {
+      background: linear-gradient(145deg, #1a1a24 0%, #0f0f14 100%);
+      border: 3px solid var(--pixel-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 
+        0 0 0 1px rgba(0,245,212,0.1),
+        0 24px 48px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .console-mockup::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta), var(--accent-yellow));
+      opacity: 0.8;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .game-tile {
+      aspect-ratio: 1;
+      background: var(--bg-card);
+      border: 2px solid var(--pixel-border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.5rem;
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+
+    .game-tile:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0,245,212,0.2);
+    }
+
+    .game-tile.highlight {
+      background: linear-gradient(135deg, rgba(0,245,212,0.1), rgba(155,93,229,0.1));
+      border-color: var(--accent-magenta);
+      color: var(--accent-yellow);
+    }
+
+    /* Seção de clássicos */
+    .classics-section {
+      padding: 100px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-title h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: clamp(0.875rem, 2.5vw, 1.25rem);
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .section-title p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .classics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .classic-card {
+      background: var(--bg-card);
+      border: 2px solid var(--pixel-border);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .classic-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent-cyan);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+
+    .classic-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,245,212,0.15);
+    }
+
+    .classic-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .classic-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 10px rgba(0,245,212,0.3));
+    }
+
+    .classic-card h3 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      margin-bottom: 8px;
+    }
+
+    .classic-card p {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Consoles */
+    .consoles-section {
+      padding: 100px 0;
+      background: rgba(0,245,212,0.02);
+    }
+
+    .consoles-marquee {
+      display: flex;
+      gap: 32px;
+      overflow-x: auto;
+      padding: 24px 24px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      max-width: 100%;
+    }
+
+    .consoles-marquee::-webkit-scrollbar {
+      display: none;
+    }
+
+    .console-badge {
+      flex-shrink: 0;
+      padding: 16px 28px;
+      background: var(--bg-card);
+      border: 2px solid var(--pixel-border);
+      border-radius: 8px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.625rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: all 0.3s;
+    }
+
+    .console-badge:hover {
+      border-color: var(--accent-purple);
+      color: var(--accent-purple);
+    }
+
+    /* Pricing */
+    .pricing-section {
+      padding: 100px 0;
+    }
+
+    .pricing-card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: linear-gradient(145deg, var(--bg-card) 0%, #0d0d12 100%);
+      border: 3px solid var(--accent-cyan);
+      border-radius: 20px;
+      padding: 48px;
+      text-align: center;
+      position: relative;
+      box-shadow: 
+        0 0 40px rgba(0,245,212,0.2),
+        0 24px 48px rgba(0,0,0,0.4);
+    }
+
+    .pricing-card::after {
+      content: 'OFERTA';
+      position: absolute;
+      top: -12px;
+      right: 24px;
+      background: var(--accent-magenta);
+      color: white;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.5rem;
+      padding: 6px 12px;
+      border-radius: 4px;
+    }
+
+    .pricing-card h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      color: var(--accent-cyan);
+      margin-bottom: 24px;
+    }
+
+    .pricing-amount {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 3rem;
+      color: var(--accent-yellow);
+      margin-bottom: 8px;
+      text-shadow: 0 0 30px rgba(254,228,64,0.4);
+    }
+
+    .pricing-amount span {
+      font-size: 1.5rem;
+      color: var(--text-muted);
+    }
+
+    .pricing-note {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+
+    .pricing-features li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--pixel-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9375rem;
+      color: var(--text-light);
+    }
+
+    .pricing-features li:last-child {
+      border-bottom: none;
+    }
+
+    .pricing-features li::before {
+      content: '✓';
+      color: var(--accent-cyan);
+      font-weight: bold;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    footer {
+      padding: 48px 0 24px;
+      border-top: 1px solid var(--pixel-border);
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    footer .logo {
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+
+    /* Responsivo */
+    @media (max-width: 900px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+      }
+
+      .hero-content {
+        max-width: 100%;
+      }
+
+      .hero-contact {
+        align-self: center;
+        text-align: center;
+      }
+
+      .hero-contact-icons {
+        justify-content: center;
+      }
+
+      .hero p {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .stats {
+        justify-content: center;
+      }
+
+      .cta-section {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        gap: 16px;
+      }
+
+      .game-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .classics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cartoon-item {
+        opacity: 0.12;
+      }
+
+      .cartoon-item:nth-child(n+6) {
+        display: none;
+      }
+
+      .dot {
+        opacity: 0.7;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-dots">
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
+    <div class="dot dot-4"></div>
+    <div class="dot dot-5"></div>
+    <div class="dot dot-6"></div>
+    <div class="dot dot-7"></div>
+    <div class="dot dot-8"></div>
+    <div class="dot dot-9"></div>
+    <div class="dot dot-10"></div>
+  </div>
+  <div class="bg-cartoons">
+    <!-- Game Boy -->
+    <div class="cartoon-item fall-1 neon-cyan" style="width: 80px;">
+      <svg viewBox="0 0 120 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="20" width="100" height="160" rx="12" fill="rgba(0,245,212,0.15)" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="25" y="45" width="70" height="55" rx="4" fill="rgba(0,0,0,0.3)" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="28" y="48" width="64" height="49" rx="2" fill="rgba(0,245,212,0.2)"/>
+        <rect x="35" y="115" width="20" height="15" rx="3" fill="currentColor" opacity="0.6"/>
+        <rect x="65" y="115" width="20" height="15" rx="3" fill="currentColor" opacity="0.6"/>
+        <circle cx="50" cy="150" r="12" fill="currentColor" opacity="0.6"/>
+        <circle cx="70" cy="150" r="12" fill="currentColor" opacity="0.6"/>
+      </svg>
+    </div>
+    <!-- Controle NES -->
+    <div class="cartoon-item fall-2 neon-pink" style="width: 100px;">
+      <svg viewBox="0 0 140 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="15" width="130" height="50" rx="8" fill="rgba(247,37,133,0.12)" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="15" y="25" width="35" height="30" rx="4" fill="rgba(0,0,0,0.3)" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="18" y="32" width="8" height="8" rx="1" fill="currentColor" opacity="0.5"/>
+        <rect x="30" y="28" width="8" height="8" rx="1" fill="currentColor" opacity="0.5"/>
+        <rect x="30" y="36" width="8" height="8" rx="1" fill="currentColor" opacity="0.5"/>
+        <rect x="38" y="32" width="8" height="8" rx="1" fill="currentColor" opacity="0.5"/>
+        <circle cx="95" cy="40" r="10" fill="currentColor" opacity="0.8"/>
+        <circle cx="115" cy="35" r="6" fill="currentColor" opacity="0.5"/>
+        <circle cx="115" cy="45" r="6" fill="currentColor" opacity="0.5"/>
+      </svg>
+    </div>
+    <!-- Cartucho -->
+    <div class="cartoon-item fall-3 neon-purple" style="width: 70px;">
+      <svg viewBox="0 0 80 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="10" width="70" height="100" rx="6" fill="rgba(155,93,229,0.12)" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="15" y="25" width="50" height="35" rx="2" fill="rgba(0,0,0,0.3)"/>
+        <rect x="20" y="70" width="40" height="25" rx="2" fill="currentColor" opacity="0.4"/>
+      </svg>
+    </div>
+    <!-- Joystick/Atari -->
+    <div class="cartoon-item fall-4 neon-yellow" style="width: 90px;">
+      <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="50" width="60" height="70" rx="8" fill="rgba(254,228,64,0.12)" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="35" y="15" width="30" height="45" rx="6" fill="rgba(0,0,0,0.3)" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="50" cy="35" r="8" fill="currentColor" opacity="0.5"/>
+        <circle cx="50" cy="75" r="8" fill="currentColor" opacity="0.8"/>
+      </svg>
+    </div>
+    <!-- Game Boy Pocket -->
+    <div class="cartoon-item fall-5 neon-cyan" style="width: 60px;">
+      <svg viewBox="0 0 90 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="15" width="74" height="120" rx="8" fill="rgba(0,245,212,0.1)" stroke="currentColor" stroke-width="2"/>
+        <rect x="18" y="35" width="54" height="42" rx="3" fill="rgba(0,0,0,0.3)"/>
+        <rect x="20" y="37" width="50" height="38" rx="2" fill="rgba(0,245,212,0.2)"/>
+        <circle cx="45" cy="95" r="6" fill="currentColor" opacity="0.5"/>
+        <circle cx="45" cy="110" r="6" fill="currentColor" opacity="0.5"/>
+      </svg>
+    </div>
+    <!-- Controle SNES -->
+    <div class="cartoon-item fall-6 neon-purple" style="width: 95px;">
+      <svg viewBox="0 0 130 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="10" width="120" height="35" rx="6" fill="rgba(155,93,229,0.12)" stroke="currentColor" stroke-width="2"/>
+        <rect x="15" y="18" width="45" height="20" rx="3" fill="rgba(0,0,0,0.3)"/>
+        <rect x="18" y="22" width="10" height="10" rx="2" fill="currentColor" opacity="0.5"/>
+        <rect x="32" y="18" width="10" height="10" rx="2" fill="currentColor" opacity="0.5"/>
+        <rect x="32" y="28" width="10" height="10" rx="2" fill="currentColor" opacity="0.5"/>
+        <rect x="46" y="22" width="10" height="10" rx="2" fill="currentColor" opacity="0.5"/>
+        <circle cx="90" cy="27" r="8" fill="currentColor" opacity="0.5"/>
+        <rect x="105" y="20" width="12" height="5" rx="2" fill="currentColor" opacity="0.5"/>
+        <rect x="105" y="28" width="12" height="5" rx="2" fill="currentColor" opacity="0.5"/>
+      </svg>
+    </div>
+    <!-- Controle PlayStation -->
+    <div class="cartoon-item fall-7 neon-pink" style="width: 85px;">
+      <svg viewBox="0 0 110 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="15" width="100" height="50" rx="10" fill="rgba(247,37,133,0.1)" stroke="currentColor" stroke-width="2"/>
+        <rect x="15" y="25" width="35" height="25" rx="4" fill="rgba(0,0,0,0.3)"/>
+        <circle cx="32" cy="37" r="4" fill="currentColor" opacity="0.8"/>
+        <circle cx="72" cy="35" r="6" fill="currentColor" opacity="0.8"/>
+        <circle cx="88" cy="35" r="6" fill="currentColor" opacity="0.6"/>
+      </svg>
+    </div>
+    <!-- Mega Drive / Genesis -->
+    <div class="cartoon-item fall-8 neon-cyan" style="width: 75px;">
+      <svg viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="15" width="90" height="40" rx="4" fill="rgba(0,245,212,0.1)" stroke="currentColor" stroke-width="2"/>
+        <rect x="15" y="22" width="50" height="26" rx="2" fill="rgba(0,0,0,0.3)"/>
+        <rect x="18" y="25" width="44" height="20" rx="1" fill="currentColor" opacity="0.3"/>
+        <circle cx="78" cy="32" r="6" fill="currentColor" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <header class="container">
+    <div class="logo">Retro<span>Box</span></div>
+    <nav>
+      <a href="#classicos">Clássicos</a>
+      <a href="#consoles">Consoles</a>
+      <a href="#preco">Preço</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div class="hero-content">
+        <div class="hero-title-block">
+          <span class="hero-badge">🎮 O emulador definitivo</span>
+          <h1>TODOS OS SEUS JOGOS RETRO EM UM SÓ LUGAR</h1>
+        </div>
+        <p>Reviva a nostalgia dos clássicos! Mais de 20.000 jogos, 100+ consoles e os maiores títulos da história dos games — Super Mario, Sonic, GTA e muito mais.</p>
+        
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-number">20.000+</span>
+            <span class="stat-label">Jogos inclusos</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">100+</span>
+            <span class="stat-label">Consoles</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">∞</span>
+            <span class="stat-label">Diversão</span>
+          </div>
+        </div>
+
+        <div class="cta-section">
+          <a href="https://whop.com/checkout/2J0lWVlbcpiamfAIA9-emjD-ovvH-YXNj-oqFVHgALwOqV/" class="btn btn-primary" target="_blank" rel="noopener">Comprar por R$ 20,00</a>
+          <a href="#classicos" class="btn btn-secondary">Ver clássicos</a>
+        </div>
+      </div>
+
+      <div class="hero-contact">
+        <p class="hero-contact-label">Mais dúvidas? Fale conosco</p>
+        <div class="hero-contact-icons">
+          <a href="tel:+5511942647843" class="icon-square" title="(11) 94264-7843">📞</a>
+          <a href="https://www.instagram.com/arcadugames_oficial/" class="icon-square" target="_blank" rel="noopener" title="Instagram">📷</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="classicos" class="classics-section container">
+      <div class="section-title">
+        <h2>CLÁSSICOS INCLUSOS</h2>
+        <p>Os jogos que marcaram gerações — todos na sua biblioteca, prontos para jogar.</p>
+      </div>
+
+      <div class="classics-grid">
+        <div class="classic-card">
+          <div class="classic-icon">🍄</div>
+          <h3>Super Mario</h3>
+          <p>A aventura do encanador mais famoso do mundo. Jogue toda a série desde o NES até o N64.</p>
+        </div>
+        <div class="classic-card">
+          <div class="classic-icon">🦔</div>
+          <h3>Sonic</h3>
+          <p>Corra em alta velocidade com o ouriço azul. Mega Drive, Game Gear e mais.</p>
+        </div>
+        <div class="classic-card">
+          <div class="classic-icon">🚗</div>
+          <h3>GTA</h3>
+          <p>Desde o clássico 2D até as versões mais recentes. Mundo aberto na palma da mão.</p>
+        </div>
+        <div class="classic-card">
+          <div class="classic-icon">⚔️</div>
+          <h3>Zelda & Pokémon</h3>
+          <p>RPGs épicos, aventuras e exploração. Centenas de títulos para descobrir.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="consoles" class="consoles-section">
+      <div class="container">
+        <div class="section-title">
+          <h2>100+ CONSOLES</h2>
+          <p>Do Atari ao PlayStation — emule praticamente qualquer console retro.</p>
+        </div>
+      </div>
+      <div class="consoles-marquee">
+        <span class="console-badge">NES</span>
+        <span class="console-badge">SNES</span>
+        <span class="console-badge">Mega Drive</span>
+        <span class="console-badge">Game Boy</span>
+        <span class="console-badge">N64</span>
+        <span class="console-badge">PlayStation</span>
+        <span class="console-badge">Dreamcast</span>
+        <span class="console-badge">Atari 2600</span>
+        <span class="console-badge">Sega Saturn</span>
+        <span class="console-badge">Neo Geo</span>
+        <span class="console-badge">GameCube</span>
+        <span class="console-badge">Master System</span>
+        <span class="console-badge">TurboGrafx</span>
+        <span class="console-badge">Game Gear</span>
+        <span class="console-badge">E muitos mais...</span>
+      </div>
+    </section>
+
+    <section id="preco" class="pricing-section container">
+      <div class="section-title">
+        <h2>UM PREÇO, ACESSO TOTAL</h2>
+        <p>Pague uma vez, jogue para sempre. Sem assinaturas, sem anúncios.</p>
+      </div>
+
+      <div class="pricing-card">
+        <h2>RETROBOX COMPLETO</h2>
+        <div class="pricing-amount">R$ 20<span>,00</span></div>
+        <p class="pricing-note">Pagamento único • Download instantâneo</p>
+        
+        <ul class="pricing-features">
+          <li>20.000+ jogos pré-inclusos</li>
+          <li>Emulação de 100+ consoles</li>
+          <li>Super Mario, Sonic, GTA e todos os clássicos</li>
+          <li>Atualizações gratuitas para sempre</li>
+          <li>Suporte para Windows, Mac e Linux</li>
+        </ul>
+
+        <a href="https://whop.com/checkout/2J0lWVlbcpiamfAIA9-emjD-ovvH-YXNj-oqFVHgALwOqV/" class="btn btn-primary" style="width: 100%; justify-content: center;" target="_blank" rel="noopener">
+          Comprar por R$ 20,00
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div class="logo">Retro<span>Box</span></div>
+    <p>© 2025 RetroBox. Todos os direitos reservados.</p>
+    <p>Reviva a nostalgia. Jogue os clássicos.</p>
+  </footer>
+</body>
+</html>
