@@ -3,6 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Script para evitar iFrame (Framebreaker) -->
+  <script type="text/javascript">
+     if (self !== top) {
+         top.location.replace(self.location.href);
+     }
+  </script>
+
   <title>RetroBox — Emulador de Jogos Retro | 20.000+ Jogos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -140,7 +148,6 @@
       z-index: 1;
     }
 
-    /* Header */
     header {
       padding: 24px 0;
       display: flex;
@@ -178,7 +185,6 @@
       color: var(--accent-cyan);
     }
 
-    /* Hero */
     .hero {
       min-height: 85vh;
       display: flex;
@@ -275,7 +281,6 @@
       max-width: 500px;
     }
 
-    /* Stats */
     .stats {
       display: flex;
       gap: 48px;
@@ -300,7 +305,6 @@
       color: var(--text-muted);
     }
 
-    /* CTA */
     .cta-section {
       display: flex;
       align-items: center;
@@ -354,71 +358,6 @@
     .price-tag span {
       font-size: 1rem;
       color: var(--text-muted);
-    }
-
-    /* Hero Visual */
-    .hero-visual {
-      flex: 1 1 380px;
-      min-width: 300px;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .console-mockup {
-      background: linear-gradient(145deg, #1a1a24 0%, #0f0f14 100%);
-      border: 3px solid var(--pixel-border);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 
-        0 0 0 1px rgba(0,245,212,0.1),
-        0 24px 48px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.05);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .console-mockup::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta), var(--accent-yellow));
-      opacity: 0.8;
-    }
-
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-
-    .game-tile {
-      aspect-ratio: 1;
-      background: var(--bg-card);
-      border: 2px solid var(--pixel-border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 0.5rem;
-      color: var(--text-muted);
-      transition: all 0.3s;
-    }
-
-    .game-tile:hover {
-      border-color: var(--accent-cyan);
-      color: var(--accent-cyan);
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(0,245,212,0.2);
-    }
-
-    .game-tile.highlight {
-      background: linear-gradient(135deg, rgba(0,245,212,0.1), rgba(155,93,229,0.1));
-      border-color: var(--accent-magenta);
-      color: var(--accent-yellow);
     }
 
     /* Seção de clássicos */
@@ -685,10 +624,6 @@
     @media (max-width: 768px) {
       nav {
         gap: 16px;
-      }
-
-      .game-grid {
-        grid-template-columns: repeat(3, 1fr);
       }
 
       .classics-grid {
